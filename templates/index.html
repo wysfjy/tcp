@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natter集控中心</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .add-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .add-form input {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .add-form button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .add-form button:hover {
+            background-color: #45a049;
+        }
+        .mapping-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .mapping-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .mapping-card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .mapping-card p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .mapping-card .status {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .mapping-card button {
+            padding: 8px 16px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .mapping-card button:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Natter集控中心</h1>
+    
+    <div class="add-form">
+        <input type="number" id="local_port" placeholder="本地端口" required>
+        <input type="number" id="remote_port" placeholder="远程端口" required>
+        <input type="text" id="stun_server" placeholder="STUN服务器 (默认: stun.qq.com:3478)" value="stun.qq.com:3478">
+        <button onclick="addMapping()">添加映射</button>
+    </div>
+    
+    <div class="mapping-list" id="mappingList">
+        {% for port, mapping in mappings.items() %}
+        <div class="mapping-card">
+            <h3>端口映射 {{ port }}</h3>
+            <p><strong>本地端口:</strong> {{ mapping.local_port }}</p>
+            <p><strong>远程端口:</strong> {{ mapping.remote_port }}</p>
+            <p><strong>外网地址:</strong> {{ mapping.mapped_addr }}</p>
+            <p><strong>状态:</strong> <span class="status">{{ mapping.status }}</span></p>
+            <p><strong>创建时间:</strong> {{ mapping.created_at }}</p>
+            <button onclick="removeMapping({{ port }})">删除映射</button>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <script>
+        function addMapping() {
+            const local_port = document.getElementById('local_port').value;
+            const remote_port = document.getElementById('remote_port').value;
+            const stun_server = document.getElementById('stun_server').value;
+            
+            fetch('/api/add_mapping', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    local_port: parseInt(local_port),
+                    remote_port: parseInt(remote_port),
+                    stun_server: stun_server
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert('添加失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('添加失败');
+            });
+        }
+        
+        function removeMapping(port) {
+            if (confirm('确定要删除这个映射吗？')) {
+                fetch(`/api/remove_mapping/${port}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert('删除失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除失败');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
+    
