@@ -32,7 +32,7 @@ def shangbao_add(port, portnei, ok):
         shangbaonotok[portnei] = port
     return 'ok'
 @app.route('/shangbao/<portnei>')
-def shangbao_get(portnei):
+def shangbao_get1(portnei):
     if portnei in shangbaonotok:
         return shangbaonotok[portnei]
     elif portnei in shangbao:
