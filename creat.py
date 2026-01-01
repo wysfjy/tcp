@@ -180,7 +180,7 @@ def test(shangbao, i = 0):
         return
 
 creat()
-time.sleep(10)
+time.sleep(30)
 while True:
     shangbao = requests.get("http://127.0.0.1:3319/shangbao")
     shangbao = shangbao.text
