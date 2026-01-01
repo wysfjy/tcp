@@ -186,4 +186,4 @@ while True:
     shangbao = shangbao.text
     shangbao = json.loads(shangbao.replace("'", '"'))
     test(shangbao)
-    time.sleep(1)
+    time.sleep(60)
