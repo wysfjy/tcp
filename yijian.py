@@ -1,5 +1,6 @@
 import subprocess
 import flask
+import time
 shangbao = {}
 a = {}
 app = flask.Flask(__name__)
@@ -12,7 +13,8 @@ def start(port):
     return 'ok'
 @app.route('/stop')
 def stop():
-    for port in a:
+    # 转换为列表避免字典在迭代时改变大小
+    for port in list(a.keys()):
         proc = a[port]
         proc.terminate()
         try:

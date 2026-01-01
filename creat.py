@@ -1,14 +1,12 @@
 import json
 import time
-from typing import Dict, List, Tuple
-
-import threading
-import socket
-import select
+import json
 import requests
+from mcstatus import JavaServer
 
 # 读取配置文件
 import json
+
 with open('config.json', 'r') as f:
     config = json.load(f)
 
@@ -19,52 +17,6 @@ CF_BASE_URL = "https://api.cloudflare.com/client/v4/zones"
 # 域名配置
 DOMAIN_YUAN = config['domains']['yuan']
 DOMAIN_MC = config['domains']['mc']
-
-def forward_ipv6(port,to_port):
-    """在独立线程中将 IPv6 的 19847 端口流量转发到 19832 端口，不影响 IPv4"""
-    listen_addr = ('::', int(port), 0, 0)   # IPv6 任意地址
-    target_addr = ('::1', int(to_port), 0, 0)  # IPv6 本地回环
-
-    # 创建 IPv6 TCP socket
-    server = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(listen_addr)
-    server.listen(5)
-
-    while True:
-        client, addr = server.accept()
-        # 为每个连接单独开线程，实现并发
-        threading.Thread(target=handle_forward, args=(client, target_addr), daemon=True).start()
-
-def handle_forward(client, target_addr):
-    """处理单个连接的转发"""
-    try:
-        remote = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-        remote.connect(target_addr)
-
-        # 双向转发
-        sockets = [client, remote]
-        while True:
-            r, _, _ = select.select(sockets, [], [])
-            if client in r:
-                data = client.recv(4096)
-                if not data:
-                    break
-                remote.sendall(data)
-            if remote in r:
-                data = remote.recv(4096)
-                if not data:
-                    break
-                client.sendall(data)
-    except Exception:
-        pass
-    finally:
-        client.close()
-        remote.close()
-
-# 启动 IPv6 转发线程，不阻塞主线程
-def create_forward_ipv6(port,to_port):
-    threading.Thread(target=forward_ipv6, args=(port,to_port), daemon=True).start()
 
 def update_dns_record(record_type, name, content, ttl=1, proxied=False):
     """更新 Cloudflare DNS 记录"""
@@ -178,12 +130,12 @@ def update_srv_record(name, service, proto, priority, weight, port, target):
 def creat():
     requests.get("http://127.0.0.1:3319/start/25565")
     time.sleep(20)
-    shangbao = requests.get("http://127.0.0.1:3319/shangbao").text
+    a = requests.get("http://127.0.0.1:3319/shangbao")
+    shangbao = a.text
     print(f"上报内容: {shangbao}")
     
     # 解析JSON格式的上报内容
     try:
-        import json
         shangbao_data = json.loads(shangbao.replace("'", '"'))
         if "25565" in shangbao_data:
             ip_port = shangbao_data["25565"]
@@ -205,5 +157,33 @@ def creat():
             print("解析失败: 没有找到25565端口的数据")
     except json.JSONDecodeError as e:
         print(f"JSON解析失败: {e}")
-    
+def test(shangbao, i = 0):
+    try:
+        server = JavaServer.lookup(shangbao["25565"])
+        print(server.ping())
+    except TimeoutError:
+        print(f"测试失败")
+        if i < 10:
+            time.sleep(5)
+            test(shangbao, i + 1)
+        else:
+            requests.get(f"http://127.0.0.1:3319/stop")
+            creat()
+            time.sleep(60)
+            return
+    except Exception as e:
+        print(f"测试失败: {e}")
+        requests.get(f"http://127.0.0.1:3319/stop")
+        time.sleep(60)
+        creat()
+        time.sleep(60)
+        return
+
 creat()
+time.sleep(10)
+while True:
+    shangbao = requests.get("http://127.0.0.1:3319/shangbao")
+    shangbao = shangbao.text
+    shangbao = json.loads(shangbao.replace("'", '"'))
+    test(shangbao)
+    time.sleep(1)
