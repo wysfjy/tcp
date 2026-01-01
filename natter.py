@@ -934,7 +934,7 @@ def natter_main(show_title = True):
         addr_to_uri(natter_addr, udp=udp_mode), addr_to_uri(outer_addr, udp=udp_mode)
     )
     Logger.info(route_str)
-    requests.get(url=f"http://127.0.0.1:3319/shangbao/{addr_to_uri(outer_addr, udp=udp_mode, a=1)}/{to_addr[1]}")
+    requests.get(url=f"http://127.0.0.1:3319/shangbao/{addr_to_uri(outer_addr, udp=udp_mode, a=1)}/{to_addr[1]}/1")
     Logger.info()
 
     # Test mode notice
@@ -965,6 +965,9 @@ def natter_main(show_title = True):
             Logger.warning("!! Hole punching failed !!")
         elif ret3 == 1 and ret4 == -1:
             Logger.warning("!! You may be behind a firewall !!")
+        elif ret3 == -1 and ret4 == 1:
+            Logger.warning("!! You may can't use auto retry when network is unstable !!")
+            requests.get(url=f"http://127.0.0.1:3319/shangbao/{addr_to_uri(outer_addr, udp=udp_mode, a=1)}/{to_addr[1]}/0")
         Logger.info()
         # retry
         if keep_retry and ret1 == -1:

@@ -1,6 +1,7 @@
 import subprocess
 import flask
 import time
+shangbaonotok = {}
 shangbao = {}
 a = {}
 app = flask.Flask(__name__)
@@ -24,10 +25,18 @@ def stop():
             proc.wait()
         a.pop(port)
     return 'ok'
-@app.route('/shangbao/<port>/<portnei>')
-def shangbao_add(port, portnei):
+@app.route('/shangbao/<port>/<portnei>/<ok>')
+def shangbao_add(port, portnei, ok):
     shangbao[portnei] = port
+    if ok == "0":
+        shangbaonotok[portnei] = port
     return 'ok'
+@app.route('/shangbao/<portnei>')
+def shangbao_get(portnei):
+    if portnei in shangbaonotok:
+        return shangbaonotok[portnei]
+    elif portnei in shangbao:
+        return "ok"
 @app.route('/shangbao')
 def shangbao_get():
     return str(shangbao)

@@ -181,9 +181,12 @@ def test(shangbao, i = 0):
 
 creat()
 time.sleep(30)
-while True:
-    shangbao = requests.get("http://127.0.0.1:3319/shangbao")
-    shangbao = shangbao.text
-    shangbao = json.loads(shangbao.replace("'", '"'))
-    test(shangbao)
-    time.sleep(60)
+if requests.get("http://127.0.0.1:3319/shangbao/25565").text == "ok":
+    while True:
+        shangbao = requests.get("http://127.0.0.1:3319/shangbao")
+        shangbao = shangbao.text
+        shangbao = json.loads(shangbao.replace("'", '"'))
+        test(shangbao)
+        time.sleep(60)
+else:
+    print("当前内网未成功，但已完成穿透，断线重连将仅在外网ip未改变时成功")
