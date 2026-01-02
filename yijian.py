@@ -1,6 +1,6 @@
 import subprocess
 import flask
-import time
+import os
 shangbaonotok = {}
 shangbao = {}
 a = {}
@@ -9,7 +9,12 @@ app = flask.Flask(__name__)
 def start(port):
     if port in a:
         return 'port already started'
-    port1 = subprocess.Popen(['python', 'natter.py', '-p', port])
+    #在linux使用python3启动natter.py，在windows使用python启动natter.py
+    if os.name == 'posix':
+        port1 = subprocess.Popen(['python3', 'natter.py', '-p', port])
+    else:
+        port1 = subprocess.Popen(['python', 'natter.py', '-p', port])
+
     a[port] = port1
     return 'ok'
 @app.route('/stop')
