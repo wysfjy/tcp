@@ -28,8 +28,8 @@ def stop():
 @app.route('/shangbao/<port>/<portnei>/<ok>')
 def shangbao_add(port, portnei, ok):
     shangbao[portnei] = port
-    if ok == "0":
-        shangbaonotok[portnei] = port
+    if ok != "0":
+        shangbaonotok[portnei] = ok
     return 'ok'
 @app.route('/shangbao/<portnei>')
 def shangbao_get1(portnei):

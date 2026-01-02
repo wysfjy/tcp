@@ -181,7 +181,8 @@ def test(shangbao, i = 0):
 
 creat()
 time.sleep(30)
-if requests.get("http://127.0.0.1:3319/shangbao/25565").text == "ok":
+i = requests.get("http://127.0.0.1:3319/shangbao/25565").text
+if i == "ok":
     while True:
         shangbao = requests.get("http://127.0.0.1:3319/shangbao")
         shangbao = shangbao.text
@@ -189,4 +190,4 @@ if requests.get("http://127.0.0.1:3319/shangbao/25565").text == "ok":
         test(shangbao)
         time.sleep(60)
 else:
-    print("当前内网未成功，但已完成穿透，断线重连将仅在外网ip未改变时成功")
+    print(i)
