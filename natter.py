@@ -973,7 +973,7 @@ def natter_main(show_title = True):
             requests.get(url=f"http://127.0.0.1:3319/shangbao/{addr_to_uri(outer_addr, udp=udp_mode, a=1)}/{to_addr[1]}/{"当前内网已成功，但未完成穿透"}")
         elif ret3 == -1 and ret4 == 1:
             Logger.warning("!! You may can't use auto retry when network is unstable !!")
-            requests.get(url=f"http://127.0.0.1:3319/shangbao/{addr_to_uri(outer_addr, udp=udp_mode, a=1)}/{to_addr[1]}/{"当前内网未成功，但已完成穿透，断线重连将仅在外网ip未改变时成功"}")
+            requests.get(url=f"http://127.0.0.1:3319/shangbao/{addr_to_uri(outer_addr, udp=udp_mode, a=1)}/{to_addr[1]}/{"当前内网未成功，但已完成穿透，断线重连将仅在外网ip未改变时成功（这不是你的问题，实际上，电信网络很容易遇到，我们对此无能为力）"}")
         Logger.info()
         # retry
         if keep_retry and ret1 == -1:
